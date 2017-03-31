@@ -37,6 +37,7 @@ class WickedPdf
   attr_accessor :binary_version
 
   def initialize(wkhtmltopdf_binary_path = nil)
+    @exe_cat_path = '/bin/cat'
     @exe_path = wkhtmltopdf_binary_path || find_wkhtmltopdf_binary_path
     raise "Location of #{EXE_NAME} unknown" if @exe_path.empty?
     raise "Bad #{EXE_NAME}'s path: #{@exe_path}" unless File.exist?(@exe_path)
@@ -67,12 +68,16 @@ class WickedPdf
     # merge in global config options
     options.merge!(WickedPdf.config) { |_key, option, _config| option }
     generated_pdf_file = WickedPdfTempfile.new('wicked_pdf_generated_file.pdf', options[:temp_path])
-    command = [@exe_path]
-    command << '-q' unless on_windows? # suppress errors on stdout
-    command += parse_options(options)
-    command << url
-    command << generated_pdf_file.path.to_s
+    command1 = [@exe_cat_path]
+    command1 << url.sub!('file:///', '')
 
+    command2 = [@exe_path]
+    command2 << '-q' unless on_windows? # suppress errors on stdout
+    command2 += parse_options(options)
+    command2 << '-'
+    command2 << generated_pdf_file.path.to_s
+
+    command = [command1.join(' '), command2.join(' ')].join(' | ')
     print_command(command.inspect) if in_development_mode?
 
     err = Open3.popen3(*command) do |_stdin, _stdout, stderr|
