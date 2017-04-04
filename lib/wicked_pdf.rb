@@ -72,7 +72,7 @@ class WickedPdf
     command1 << url.sub!('file:///', '')
 
     command2 = [@exe_path]
-    command2 << '-q' unless on_windows? # suppress errors on stdout
+    #command2 << '-q' unless on_windows? # suppress errors on stdout
     command2 += parse_options(options)
     command2 << '-'
     command2 << generated_pdf_file.path.to_s
