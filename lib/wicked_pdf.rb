@@ -12,6 +12,7 @@ else
 end
 
 begin
+  require 'active_support'
   require 'active_support/core_ext/module/attribute_accessors'
 rescue LoadError
   require 'active_support/core_ext/class/attribute_accessors'
